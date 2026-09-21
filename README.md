@@ -23,7 +23,7 @@
 - ⚡ **Tek Tıkla Kontrol:** Arayüzdeki büyük butondan veya görev çubuğundaki / saatin yanındaki sistem tepsisi simgesinden tek tıkla açıp kapatma.
 - 🔥 **Geniş Renk Sıcaklığı (1800K - 6500K):** Rahat okuma, mum ışığı veya akşam modları.
 - ☀️ **Ekran Parlaklığı Ayarı (%25 - %100):** Gece gözü yormayan yumuşak karartma.
-- 🚀 **Kurulumsuz & Taşınabilir (Portable):** Tek tıkla çalışan hafif `.exe` veya kurulum sihirbazı.
+
 
 ---
 
