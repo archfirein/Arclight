@@ -1,46 +1,42 @@
-# 🌙 ArcLight - Smart Night Light & Blue Light Filter
+# ArcLight 0.3
 
-<p align="center">
-  <strong>Windows için Hafif, Modern ve Akıllı Mavi Işık Filtresi</strong><br>
-  <em>Lightweight, Modern & Smart Blue Light Filter for Windows (x64, x86, ARM64)</em>
-</p>
+Windows için gece modu, renk sıcaklığı ve parlaklık uygulaması.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?style=flat-square" alt="Platform">
-  <img src="https://img.shields.io/badge/Architecture-x64%20%7C%20x86%20%7C%20ARM64-orange?style=flat-square" alt="Arch">
-  <img src="https://img.shields.io/badge/Language-C%23-green?style=flat-square" alt="Language">
-  <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square" alt="License">
-</p>
+## İndirme
 
----
+[Güncel sürümler](https://github.com/archfirein/Arclight/releases)
 
-## ✨ Özellikler / Features
+- `ArcLight-Installer.win-x64.exe`: standart 64 bit Windows kurulumu.
+- `ArcLight-Installer.win-x86.exe`: 32 bit Windows kurulumu.
+- `ArcLight-Installer.win-arm64.exe`: ARM64 Windows kurulumu.
+- `ArcLight.win-*.zip`: aynı uygulamanın taşınabilir paketi.
 
-- 💻 **Donanımsal Gamma Kontrolü (Hardware Gamma Ramp):** Ekranın üzerine sahte filtre katmanı koymaz; doğrudan Windows donanım renk motorunu kontrol eder. Oyunlarda ve videolarda sıfır FPS/performans kaybı yaşatır.
-- 📍 **Akıllı Lokasyon & Güneş Takibi:** Şehrinizi seçtiğinizde koordinatlara göre günlük gün doğumu ve gün batımı saatlerini hesaplar. Akşam otomatik açılır, sabah otomatik kapanır.
-- ⏰ **Özel Saat Aralığı:** İsteğe bağlı olarak dilediğiniz başlangıç ve bitiş saatini belirleyebilirsiniz.
-- 🌐 **7 Dil Desteği:** 🇹🇷 Türkçe, 🇬🇧 English, 🇪🇸 Español, 🇫🇷 Français, 🇨🇳 简体中文, 🇯🇵 日本語, 🇰🇷 한국어.
-- ⚡ **Tek Tıkla Kontrol:** Arayüzdeki büyük butondan veya görev çubuğundaki / saatin yanındaki sistem tepsisi simgesinden tek tıkla açıp kapatma.
-- 🔥 **Geniş Renk Sıcaklığı (1800K - 6500K):** Rahat okuma, mum ışığı veya akşam modları.
-- ☀️ **Ekran Parlaklığı Ayarı (%25 - %100):** Gece gözü yormayan yumuşak karartma.
+x64/x86 için .NET Framework 4 veya sonrası gerekir. Yerel ARM64 çalıştırma için
+ARM64 destekli .NET Framework 4.8.1 ve uyumlu Windows sürümü gerekir.
 
+Güncellemeden önce ArcLight içindeki **Çık** düğmesini kullanın. Yeni kurulum mevcut
+konum ve kullanıcı ayarlarını korur. Ctrl+Alt+N, gece modunu açıp kapatır.
 
----
+## Düzeltmeler
 
-## 📦 İndirme / Download
+Konum kaydı atomik dosya değiştirme ve yedek kurtarma kullanır. Gece/gündüz
+açıklaması ile klavye kısayolu ayrı satırlarda, metne göre boyutlandırılır.
+Ayarlar `%APPDATA%\ArcLight\ayarlar.cfg`, önceki geçerli kayıt ise `.bak` dosyasıdır.
 
-En son sürümü doğrudan [Releases (Sürümler)](../../releases) sayfasından indirebilirsiniz:
+## Kaynak ve derleme
 
-- **ArcLight-Installer.win-x64.exe** - Standart 64-bit Windows bilgisayarlar için kurulumcu
-- **ArcLight-Installer.win-arm64.exe** - Snapdragon / ARM tabanlı cihazlar için
-- **ArcLight-Installer.win-x86.exe** - 32-bit eski sistemler için
-- **ArcLight.win-x64.zip** - Kurulumsuz taşınabilir (Portable) sürüm
+`Program.cs` önceki kurulu sürümden geri elde edilen kaynak üzerine uygulanmış
+düzeltmeleri içerir. `Settings.cs` güvenli kayıt ve kurtarmayı içerir.
 
----
+Windows PowerShell'de `./build-release.ps1` çalıştırın. Betik gerekirse Microsoft'un
+NuGet deposundan Roslyn 4.8.0 derleyicisini indirir ve üç mimariyi `release/` içinde
+oluşturur. `-Compiler` ile mevcut Roslyn `csc.exe` yolu verilebilir.
 
-## 🛠️ Kurulum ve Derleme (Build from Source)
+Kaynak ZIP ve TAR.GZ aynı kaynakları içerir. `SHA256SUMS.txt` sekiz dağıtım
+dosyasının SHA-256 değerlerini içerir.
 
-Windows'un yerleşik C# derleyicisi (`csc.exe`) ile harici hiçbir araç gerekmeden derlenebilir:
+## Doğrulama
 
-```cmd
-C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /target:winexe /win32icon:app.ico /out:ArcLight.exe /r:System.Windows.Forms.dll,System.Drawing.dll Program.cs
+15 ayar testi; 7 dil, iki mod ve farklı yazı boyutlarıyla 56 yerleşim kontrolü geçti.
+x64 üzerinde uygulama açılışı, Ctrl+Alt+N ve yeniden açılışta Erzurum konumunun
+korunması kontrol edildi. ARM64 ve 32 bit Windows üzerinde cihaz testi yapılmadı.
