@@ -1,4 +1,4 @@
-# ArcLight 0.3
+# ArcLight 0.3.1
 
 Windows için gece modu, renk sıcaklığı ve parlaklık uygulaması.
 
@@ -40,3 +40,8 @@ dosyasının SHA-256 değerlerini içerir.
 15 ayar testi; 7 dil, iki mod ve farklı yazı boyutlarıyla 56 yerleşim kontrolü geçti.
 x64 üzerinde uygulama açılışı, Ctrl+Alt+N ve yeniden açılışta Erzurum konumunun
 korunması kontrol edildi. ARM64 ve 32 bit Windows üzerinde cihaz testi yapılmadı.
+
+## Uygulama geçişlerinde filtre kurtarma
+
+Filtre açıkken renk tablosundaki değişimler ölçülüp geri yüklenir. 11 kurtarma testi eklendi. Gerçek oyun/Alt+Tab ve HDR testi henüz yapılmadı; tam ekran geçişinde kısa renk değişimleri olabilir.
+

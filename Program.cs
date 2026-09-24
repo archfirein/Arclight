@@ -13,8 +13,8 @@ using Microsoft.Win32;
 
 [assembly: CompilationRelaxations(8)]
 [assembly: RuntimeCompatibility(WrapNonExceptionThrows = true)]
-[assembly: AssemblyVersion("0.3.0.0")]
-[assembly: AssemblyFileVersion("0.3.0.0")]
+[assembly: AssemblyVersion("0.3.1.0")]
+[assembly: AssemblyFileVersion("0.3.1.0")]
 namespace ArcLight
 {
 	public static class GammaController
@@ -32,6 +32,73 @@ namespace ArcLight
 		}
 
 		private static RAMP? _originalRamp = null;
+        internal static RAMP? ExpectedRamp;
+        private static DateTime _nextRecovery = DateTime.MinValue;
+        private static int _recoveryFailures;
+
+        internal static bool RampsMatch(RAMP a, RAMP b)
+        {
+            if (a.Red == null || a.Green == null || a.Blue == null || b.Red == null || b.Green == null || b.Blue == null) return false;
+            if (a.Red.Length != 256 || a.Green.Length != 256 || a.Blue.Length != 256 || b.Red.Length != 256 || b.Green.Length != 256 || b.Blue.Length != 256) return false;
+            for (int i = 0; i < 256; i++)
+                if (Math.Abs((int)a.Red[i] - b.Red[i]) > 256 || Math.Abs((int)a.Green[i] - b.Green[i]) > 256 || Math.Abs((int)a.Blue[i] - b.Blue[i]) > 256) return false;
+            return true;
+        }
+
+        private static RAMP? ReadRamp()
+        {
+            IntPtr dc = GetDC(IntPtr.Zero);
+            if (dc == IntPtr.Zero) return null;
+            try
+            {
+                RAMP ramp = new RAMP { Red = new ushort[256], Green = new ushort[256], Blue = new ushort[256] };
+                return GetDeviceGammaRamp(dc, ref ramp) ? (RAMP?)ramp : null;
+            }
+            finally { ReleaseDC(IntPtr.Zero, dc); }
+        }
+
+        private static bool WriteRamp(RAMP ramp)
+        {
+            IntPtr dc = GetDC(IntPtr.Zero);
+            if (dc == IntPtr.Zero) return false;
+            try { return SetDeviceGammaRamp(dc, ref ramp); }
+            finally { ReleaseDC(IntPtr.Zero, dc); }
+        }
+
+        public static void EnsureApplied()
+        {
+            try { Recover(ReadRamp, WriteRamp, DateTime.UtcNow); }
+            catch { } // A driver transition must not terminate the UI message loop.
+        }
+
+        internal static bool Recover(Func<RAMP?> read, Func<RAMP, bool> write, DateTime now)
+        {
+            if (!ExpectedRamp.HasValue || now < _nextRecovery) return false;
+            RAMP desired = ExpectedRamp.Value;
+            RAMP? actual = read();
+            if (actual.HasValue && RampsMatch(actual.Value, desired))
+            {
+                _recoveryFailures = 0;
+                return false;
+            }
+            // Only rewrite on a measured mismatch; unavailable displays are retried later.
+            bool restored = false;
+            if (actual.HasValue && write(desired))
+            {
+                RAMP? verified = read();
+                restored = verified.HasValue && RampsMatch(verified.Value, desired);
+            }
+            _recoveryFailures = restored ? 0 : Math.Min(4, _recoveryFailures + 1);
+            _nextRecovery = now.AddMilliseconds(restored ? 500 : 500 * (1 << _recoveryFailures));
+            return restored;
+        }
+
+        internal static void SetExpected(RAMP ramp)
+        {
+            ExpectedRamp = ramp;
+            _nextRecovery = DateTime.MinValue;
+            _recoveryFailures = 0;
+        }
 
 		[DllImport("gdi32.dll")]
 		public static extern bool SetDeviceGammaRamp(IntPtr hdc, ref RAMP lpRamp);
@@ -104,6 +171,7 @@ namespace ArcLight
 					lpRamp.Green[i] = (ushort)Math.Max(0, Math.Min(65535, (int)(num2 * g)));
 					lpRamp.Blue[i] = (ushort)Math.Max(0, Math.Min(65535, (int)(num2 * b)));
 				}
+                SetExpected(lpRamp);
 				IntPtr dC = GetDC(IntPtr.Zero);
 				if (dC != IntPtr.Zero)
 				{
@@ -675,6 +743,7 @@ namespace ArcLight
 		private ContextMenuStrip _trayMenu;
 
 		private System.Windows.Forms.Timer _scheduleTimer;
+        private System.Windows.Forms.Timer _gammaRecoveryTimer;
 
 		private System.Windows.Forms.Timer _saveDebounceTimer;
 
@@ -828,6 +897,9 @@ namespace ArcLight
 			InitializeUI();
 			SetupTrayIcon();
 			SetupTimer();
+            _gammaRecoveryTimer = new System.Windows.Forms.Timer { Interval = 500 };
+            _gammaRecoveryTimer.Tick += delegate { if (!_isExiting && _settings.IsEnabled && (_fadeTimer == null || !_fadeTimer.Enabled)) GammaController.EnsureApplied(); };
+            _gammaRecoveryTimer.Start();
 			SetupSystemEvents();
 			CheckScheduleAndApply(true);
 		}
@@ -1475,7 +1547,7 @@ namespace ArcLight
 			{
 				Location = new Point(10, 88),
 				Size = new Size(362, 22),
-				Text = "ArcLight v0.3  •  x64 / x86 / ARM64  •  Hafif & Güvenli",
+				Text = "ArcLight v0.3.1  •  x64 / x86 / ARM64  •  Hafif & Güvenli",
 				Font = new Font("Segoe UI", 8f),
 				ForeColor = Color.FromArgb(190, 190, 205),
 				TextAlign = ContentAlignment.MiddleCenter
@@ -2191,6 +2263,7 @@ namespace ArcLight
 			if (!_isExiting)
 			{
 				_isExiting = true;
+                if (_gammaRecoveryTimer != null) { _gammaRecoveryTimer.Stop(); _gammaRecoveryTimer.Dispose(); _gammaRecoveryTimer = null; }
 				try
 				{
 					UnregisterHotKey(base.Handle, 9001);

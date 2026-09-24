@@ -1,4 +1,4 @@
-﻿param([string]$Compiler, [string]$OutputDirectory)
+param([string]$Compiler, [string]$OutputDirectory)
 $ErrorActionPreference = 'Stop'
 if (-not $OutputDirectory) { $OutputDirectory = Join-Path $PSScriptRoot 'release' }
 $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
@@ -27,7 +27,7 @@ try {
         Copy-Item -LiteralPath README.md -Destination (Join-Path $stage 'README.md')
         Compress-Archive -Path $application,(Join-Path $stage 'README.md') -DestinationPath (Join-Path $OutputDirectory "ArcLight.win-$architecture.zip") -Force
     }
-    $sourceFiles = @('Program.cs','Settings.cs','Installer.cs','GenerateIcon.cs','app.ico','README.md','CHANGELOG.md','build-release.ps1','SettingsTests.cs','layout-results.txt')
+    $sourceFiles = @('Program.cs','Settings.cs','Installer.cs','GenerateIcon.cs','app.ico','README.md','CHANGELOG.md','build-release.ps1','SettingsTests.cs','RecoveryTests.cs','layout-results.txt')
     Compress-Archive -Path $sourceFiles -DestinationPath (Join-Path $OutputDirectory 'Source.code.zip') -Force
     & tar -czf (Join-Path $OutputDirectory 'Source.code.tar.gz') @sourceFiles
     if ($LASTEXITCODE -ne 0) { throw 'Source tar archive failed' }
@@ -36,3 +36,4 @@ try {
     }
     [IO.File]::WriteAllLines((Join-Path $OutputDirectory 'SHA256SUMS.txt'), [string[]]$sums, (New-Object Text.UTF8Encoding($false)))
 } finally { Pop-Location }
+

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -317,7 +317,7 @@ namespace ArcLightInstaller
                     if (key != null)
                     {
                         key.SetValue("DisplayName", "ArcLight");
-                        key.SetValue("DisplayVersion", "0.3.0");
+                        key.SetValue("DisplayVersion", "0.3.1");
                         key.SetValue("Publisher", "ArcLight");
                         key.SetValue("DisplayIcon", targetExe);
                         key.SetValue("InstallLocation", installDir);
@@ -454,3 +454,4 @@ namespace ArcLightInstaller
         }
     }
 }
+
