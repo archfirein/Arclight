@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -13,8 +13,8 @@ using Microsoft.Win32;
 
 [assembly: CompilationRelaxations(8)]
 [assembly: RuntimeCompatibility(WrapNonExceptionThrows = true)]
-[assembly: AssemblyVersion("0.3.1.0")]
-[assembly: AssemblyFileVersion("0.3.1.0")]
+[assembly: AssemblyVersion("0.3.4.0")]
+[assembly: AssemblyFileVersion("0.3.4.0")]
 namespace ArcLight
 {
 	public static class GammaController
@@ -1547,7 +1547,7 @@ namespace ArcLight
 			{
 				Location = new Point(10, 88),
 				Size = new Size(362, 22),
-				Text = "ArcLight v0.3.1  •  x64 / x86 / ARM64  •  Hafif & Güvenli",
+				Text = "ArcLight v0.3.4  •  x64 / x86 / ARM64  •  Hafif & Güvenli",
 				Font = new Font("Segoe UI", 8f),
 				ForeColor = Color.FromArgb(190, 190, 205),
 				TextAlign = ContentAlignment.MiddleCenter
@@ -1846,6 +1846,14 @@ namespace ArcLight
 			return button2;
 		}
 
+        internal static void SetButtonFont(Button button, float size, FontStyle style)
+        {
+            Font previous = button.Font;
+            if (previous.Name == "Segoe UI" && Math.Abs(previous.SizeInPoints - size) < 0.01f && previous.Style == style) return;
+            button.Font = new Font("Segoe UI", size, style);
+            // These buttons are initialized with individually owned fonts.
+            previous.Dispose();
+        }
 		private void UpdatePresetButtonHighlight(Button btn, bool active)
 		{
 			if (btn != null)
@@ -1854,14 +1862,14 @@ namespace ArcLight
 				{
 					btn.BackColor = Color.FromArgb(64, 38, 22);
 					btn.ForeColor = Color.White;
-					btn.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
+					SetButtonFont(btn, 8f, FontStyle.Bold);
 					btn.FlatAppearance.BorderColor = _accentOrange;
 				}
 				else
 				{
 					btn.BackColor = Color.FromArgb(36, 36, 46);
 					btn.ForeColor = Color.White;
-					btn.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+					SetButtonFont(btn, 8f, FontStyle.Regular);
 					btn.FlatAppearance.BorderColor = Color.FromArgb(55, 55, 68);
 				}
 			}
@@ -1903,14 +1911,14 @@ namespace ArcLight
 				{
 					btn.BackColor = _accentOrange;
 					btn.ForeColor = Color.White;
-					btn.Font = new Font("Segoe UI", 8.8f, FontStyle.Bold);
+					SetButtonFont(btn, 8.8f, FontStyle.Bold);
 					btn.FlatAppearance.BorderColor = _accentOrange;
 				}
 				else
 				{
 					btn.BackColor = Color.FromArgb(36, 36, 46);
 					btn.ForeColor = Color.White;
-					btn.Font = new Font("Segoe UI", 8.8f, FontStyle.Regular);
+					SetButtonFont(btn, 8.8f, FontStyle.Regular);
 					btn.FlatAppearance.BorderColor = Color.FromArgb(55, 55, 68);
 				}
 			}
@@ -2303,102 +2311,12 @@ namespace ArcLight
 			}
 		}
 
-		public static Bitmap CreateLogoBitmap(int size)
-		{
-			Bitmap bitmap = new Bitmap(size, size);
-			using (Graphics graphics = Graphics.FromImage(bitmap))
-			{
-				graphics.SmoothingMode = SmoothingMode.HighQuality;
-				graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-				graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-				graphics.Clear(Color.Transparent);
-				float num = size;
-				using (GraphicsPath graphicsPath = new GraphicsPath())
-				{
-					graphicsPath.AddEllipse(num * 0.02f, num * 0.02f, num * 0.96f, num * 0.96f);
-					using (PathGradientBrush pathGradientBrush = new PathGradientBrush(graphicsPath))
-					{
-						pathGradientBrush.CenterColor = Color.FromArgb(249, 115, 22);
-						pathGradientBrush.SurroundColors = new Color[1] { Color.FromArgb(0, 249, 115, 22) };
-						graphics.FillPath(pathGradientBrush, graphicsPath);
-					}
-				}
-				using (Brush brush = new SolidBrush(Color.FromArgb(22, 22, 28)))
-				{
-					graphics.FillEllipse(brush, num * 0.04f, num * 0.04f, num * 0.92f, num * 0.92f);
-				}
-				float num2 = Math.Max(1.2f, num * 0.045f);
-				using (Pen pen = new Pen(Color.FromArgb(249, 115, 22), num2))
-				{
-					graphics.DrawEllipse(pen, num * 0.05f, num * 0.05f, num * 0.9f, num * 0.9f);
-				}
-				using (GraphicsPath graphicsPath2 = new GraphicsPath())
-				{
-					PointF pointF = new PointF(num * 0.5f, num * 0.15f);
-					PointF pointF2 = new PointF(num * 0.19f, num * 0.83f);
-					PointF pointF3 = new PointF(num * 0.33f, num * 0.83f);
-					PointF pointF4 = new PointF(num * 0.67f, num * 0.83f);
-					PointF pointF5 = new PointF(num * 0.81f, num * 0.83f);
-					PointF[] points = new PointF[7]
-					{
-						pointF,
-						pointF5,
-						pointF4,
-						new PointF(num * 0.63f, num * 0.66f),
-						new PointF(num * 0.37f, num * 0.66f),
-						pointF3,
-						pointF2
-					};
-					graphicsPath2.AddPolygon(points);
-					PointF pointF6 = new PointF(num * 0.5f, num * 0.32f);
-					PointF pointF7 = new PointF(num * 0.4f, num * 0.54f);
-					PointF pointF8 = new PointF(num * 0.6f, num * 0.54f);
-					using (GraphicsPath graphicsPath3 = new GraphicsPath())
-					{
-						graphicsPath3.AddPolygon(new PointF[3] { pointF6, pointF8, pointF7 });
-						using (Region region = new Region(graphicsPath2))
-						{
-							region.Exclude(graphicsPath3);
-							using (Brush brush2 = new SolidBrush(Color.White))
-							{
-								graphics.FillRegion(brush2, region);
-							}
-						}
-					}
-				}
-				PointF pointF9 = new PointF(num * 0.5f, num * 0.44f);
-				float num3 = num * 0.125f;
-				float num4 = num3 * 0.48f;
-				PointF[] array = new PointF[10];
-				double num5 = Math.PI / 5.0;
-				double num6 = -Math.PI / 2.0;
-				for (int i = 0; i < 10; i++)
-				{
-					float num7 = ((i % 2 == 0) ? num3 : num4);
-					double num8 = num6 + (double)i * num5;
-					array[i] = new PointF(pointF9.X + (float)((double)num7 * Math.Cos(num8)), pointF9.Y + (float)((double)num7 * Math.Sin(num8)));
-				}
-				using (Brush brush3 = new SolidBrush(Color.FromArgb(251, 191, 36)))
-				{
-					graphics.FillPolygon(brush3, array);
-				}
-				using (Pen pen2 = new Pen(Color.FromArgb(217, 119, 6), Math.Max(0.6f, num * 0.015f)))
-				{
-					graphics.DrawPolygon(pen2, array);
-				}
-			}
-			return bitmap;
-		}
+		public static Bitmap CreateLogoBitmap(int size) { return ArcLightBrand.LogoArtwork.Render(size); }
 
 		private static Icon CreateAppIcon()
 		{
 			try
 			{
-				string text = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
-				if (File.Exists(text))
-				{
-					return new Icon(text);
-				}
 				Icon icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
 				if (icon != null)
 				{
@@ -2411,9 +2329,7 @@ namespace ArcLight
 			using (Bitmap bitmap = CreateLogoBitmap(48))
 			{
 				IntPtr hicon = bitmap.GetHicon();
-				Icon result = (Icon)Icon.FromHandle(hicon).Clone();
-				DestroyIcon(hicon);
-				return result;
+				try { return (Icon)Icon.FromHandle(hicon).Clone(); } finally { DestroyIcon(hicon); }
 			}
 		}
 
@@ -2510,3 +2426,7 @@ namespace ArcLight
 		}
 	}
 }
+
+
+
+

@@ -15,19 +15,24 @@ if (-not $Compiler) {
 $Compiler = [IO.Path]::GetFullPath($Compiler)
 Push-Location $PSScriptRoot
 try {
+    $iconBuilder = Join-Path $buildDirectory 'GenerateIcon.exe'
+    & $Compiler /nologo /codepage:65001 /target:exe "/out:$iconBuilder" /r:System.Drawing.dll /resource:logo.png,ArcLight.Logo.png GenerateIcon.cs LogoArtwork.cs
+    if ($LASTEXITCODE -ne 0) { throw 'Icon builder compilation failed' }
+    & $iconBuilder
+    if ($LASTEXITCODE -ne 0) { throw 'Icon generation failed' }
     foreach ($architecture in @('x64','x86','arm64')) {
         $stage = Join-Path $buildDirectory $architecture
         New-Item -ItemType Directory -Force -Path $stage | Out-Null
         $application = Join-Path $stage 'ArcLight.exe'
-        & $Compiler /nologo /codepage:65001 /deterministic+ /target:winexe "/platform:$architecture" /optimize+ /win32icon:app.ico "/out:$application" /r:System.Windows.Forms.dll /r:System.Drawing.dll Program.cs Settings.cs
+        & $Compiler /nologo /codepage:65001 /deterministic+ /target:winexe "/platform:$architecture" /optimize+ /win32icon:app.ico "/out:$application" /r:System.Windows.Forms.dll /r:System.Drawing.dll /resource:logo.png,ArcLight.Logo.png Program.cs Settings.cs LogoArtwork.cs
         if ($LASTEXITCODE -ne 0) { throw "Application build failed: $architecture" }
         $installer = Join-Path $OutputDirectory "ArcLight-Installer.win-$architecture.exe"
-        & $Compiler /nologo /codepage:65001 /deterministic+ /target:winexe "/platform:$architecture" /optimize+ /win32icon:app.ico "/out:$installer" "/resource:$application,ArcLight.exe" /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:Microsoft.CSharp.dll Installer.cs
+        & $Compiler /nologo /codepage:65001 /deterministic+ /target:winexe "/platform:$architecture" /optimize+ /win32icon:app.ico "/out:$installer" "/resource:$application,ArcLight.exe" /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:Microsoft.CSharp.dll /resource:logo.png,ArcLight.Logo.png Installer.cs LogoArtwork.cs
         if ($LASTEXITCODE -ne 0) { throw "Installer build failed: $architecture" }
         Copy-Item -LiteralPath README.md -Destination (Join-Path $stage 'README.md')
         Compress-Archive -Path $application,(Join-Path $stage 'README.md') -DestinationPath (Join-Path $OutputDirectory "ArcLight.win-$architecture.zip") -Force
     }
-    $sourceFiles = @('Program.cs','Settings.cs','Installer.cs','GenerateIcon.cs','app.ico','README.md','CHANGELOG.md','build-release.ps1','SettingsTests.cs','RecoveryTests.cs','layout-results.txt')
+    $sourceFiles = @('Program.cs','Settings.cs','Installer.cs','GenerateIcon.cs','LogoArtwork.cs','logo.png','app.ico','README.md','CHANGELOG.md','build-release.ps1','SettingsTests.cs','RecoveryTests.cs','BrandTests.cs','layout-results.txt')
     Compress-Archive -Path $sourceFiles -DestinationPath (Join-Path $OutputDirectory 'Source.code.zip') -Force
     & tar -czf (Join-Path $OutputDirectory 'Source.code.tar.gz') @sourceFiles
     if ($LASTEXITCODE -ne 0) { throw 'Source tar archive failed' }
@@ -36,4 +41,8 @@ try {
     }
     [IO.File]::WriteAllLines((Join-Path $OutputDirectory 'SHA256SUMS.txt'), [string[]]$sums, (New-Object Text.UTF8Encoding($false)))
 } finally { Pop-Location }
+
+
+
+
 

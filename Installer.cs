@@ -317,7 +317,7 @@ namespace ArcLightInstaller
                     if (key != null)
                     {
                         key.SetValue("DisplayName", "ArcLight");
-                        key.SetValue("DisplayVersion", "0.3.1");
+                        key.SetValue("DisplayVersion", "0.3.4");
                         key.SetValue("Publisher", "ArcLight");
                         key.SetValue("DisplayIcon", targetExe);
                         key.SetValue("InstallLocation", installDir);
@@ -328,100 +328,7 @@ namespace ArcLightInstaller
             catch { }
         }
 
-        private static Bitmap CreateLogoBitmap(int size)
-        {
-            Bitmap bmp = new Bitmap(size, size);
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                g.SmoothingMode = SmoothingMode.HighQuality;
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                g.Clear(Color.Transparent);
-
-                float s = (float)size;
-
-                using (GraphicsPath pGlow = new GraphicsPath())
-                {
-                    pGlow.AddEllipse(s * 0.02f, s * 0.02f, s * 0.96f, s * 0.96f);
-                    using (PathGradientBrush pgb = new PathGradientBrush(pGlow))
-                    {
-                        pgb.CenterColor = Color.FromArgb(249, 115, 22);
-                        pgb.SurroundColors = new Color[] { Color.FromArgb(0, 249, 115, 22) };
-                        g.FillPath(pgb, pGlow);
-                    }
-                }
-
-                using (Brush bgBrush = new SolidBrush(Color.FromArgb(22, 22, 28)))
-                {
-                    g.FillEllipse(bgBrush, s * 0.04f, s * 0.04f, s * 0.92f, s * 0.92f);
-                }
-
-                float penW = Math.Max(1.2f, s * 0.045f);
-                using (Pen ringPen = new Pen(Color.FromArgb(249, 115, 22), penW))
-                {
-                    g.DrawEllipse(ringPen, s * 0.05f, s * 0.05f, s * 0.90f, s * 0.90f);
-                }
-
-                using (GraphicsPath aPath = new GraphicsPath())
-                {
-                    PointF topOuter = new PointF(s * 0.50f, s * 0.15f);
-                    PointF btmLeftOuter = new PointF(s * 0.19f, s * 0.83f);
-                    PointF btmLeftInner = new PointF(s * 0.33f, s * 0.83f);
-                    PointF btmRightInner = new PointF(s * 0.67f, s * 0.83f);
-                    PointF btmRightOuter = new PointF(s * 0.81f, s * 0.83f);
-
-                    PointF[] aOutline = new PointF[]
-                    {
-                        topOuter,
-                        btmRightOuter,
-                        btmRightInner,
-                        new PointF(s * 0.63f, s * 0.66f),
-                        new PointF(s * 0.37f, s * 0.66f),
-                        btmLeftInner,
-                        btmLeftOuter
-                    };
-                    aPath.AddPolygon(aOutline);
-
-                    PointF topHole = new PointF(s * 0.50f, s * 0.32f);
-                    PointF leftHole = new PointF(s * 0.40f, s * 0.54f);
-                    PointF rightHole = new PointF(s * 0.60f, s * 0.54f);
-                    GraphicsPath holePath = new GraphicsPath();
-                    holePath.AddPolygon(new PointF[] { topHole, rightHole, leftHole });
-
-                    using (Region reg = new Region(aPath))
-                    {
-                        reg.Exclude(holePath);
-                        using (Brush aBrush = new SolidBrush(Color.White))
-                        {
-                            g.FillRegion(aBrush, reg);
-                        }
-                    }
-                }
-
-                PointF starCenter = new PointF(s * 0.50f, s * 0.44f);
-                float outerR = s * 0.125f;
-                float innerR = outerR * 0.48f;
-                PointF[] starPts = new PointF[10];
-                double step = Math.PI / 5.0;
-                double startAngle = -Math.PI / 2.0;
-                for (int i = 0; i < 10; i++)
-                {
-                    float r = (i % 2 == 0) ? outerR : innerR;
-                    double a = startAngle + i * step;
-                    starPts[i] = new PointF(starCenter.X + (float)(r * Math.Cos(a)), starCenter.Y + (float)(r * Math.Sin(a)));
-                }
-
-                using (Brush starBrush = new SolidBrush(Color.FromArgb(251, 191, 36)))
-                {
-                    g.FillPolygon(starBrush, starPts);
-                }
-                using (Pen starBorder = new Pen(Color.FromArgb(217, 119, 6), Math.Max(0.6f, s * 0.015f)))
-                {
-                    g.DrawPolygon(starBorder, starPts);
-                }
-            }
-            return bmp;
-        }
+        private static Bitmap CreateLogoBitmap(int size) { return ArcLightBrand.LogoArtwork.Render(size); }
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyIcon(IntPtr hIcon);
@@ -430,8 +337,6 @@ namespace ArcLightInstaller
         {
             try
             {
-                string icoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
-                if (File.Exists(icoPath)) return new Icon(icoPath);
                 Icon assoc = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
                 if (assoc != null) return assoc;
             }
@@ -439,9 +344,7 @@ namespace ArcLightInstaller
             using (Bitmap bmp = CreateLogoBitmap(48))
             {
                 IntPtr hIcon = bmp.GetHicon();
-                Icon ico = (Icon)Icon.FromHandle(hIcon).Clone();
-                DestroyIcon(hIcon);
-                return ico;
+                try { return (Icon)Icon.FromHandle(hIcon).Clone(); } finally { DestroyIcon(hIcon); }
             }
         }
 
@@ -454,4 +357,8 @@ namespace ArcLightInstaller
         }
     }
 }
+
+
+
+
 

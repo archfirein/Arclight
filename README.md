@@ -1,4 +1,4 @@
-# ArcLight 0.3.1
+# ArcLight 0.3.4
 
 Windows için gece modu, renk sıcaklığı ve parlaklık uygulaması.
 
@@ -44,4 +44,7 @@ korunması kontrol edildi. ARM64 ve 32 bit Windows üzerinde cihaz testi yapılm
 ## Uygulama geçişlerinde filtre kurtarma
 
 Filtre açıkken renk tablosundaki değişimler ölçülüp geri yüklenir. 11 kurtarma testi eklendi. Gerçek oyun/Alt+Tab ve HDR testi henüz yapılmadı; tam ekran geçişinde kısa renk değişimleri olabilir.
+
+
+
 
